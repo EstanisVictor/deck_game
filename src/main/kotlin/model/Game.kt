@@ -39,6 +39,20 @@ class Game (var baralho: FakeDaoSaveCartas, var jogador1: Jogador, var jogador2:
         if (escolha == 1){
             var cartaEscolhida: Carta = escolherCarta(jogador1, seu_campo)
             campo_batalha_j1.add(cartaEscolhida)
+            println("O que deseja fazer? \n1 - Encerrar o turno\n2 - Atacar\n3 - Alterar modo de carta")
+            var opcao = readLine()!!.toInt()
+            if (opcao == 1){
+                //verificando se a carta está em modo de ataque ou defesa, se for ataque, o controle de turno é incrementado
+                for (carta in campo_batalha_j1){
+                    if (carta.modo){
+                        carta.controleTurno++
+                    }
+                }
+                println("Turno encerrado")
+                return
+            }else if (opcao == 2){
+
+            }
         }
 
     }
@@ -66,7 +80,6 @@ class Game (var baralho: FakeDaoSaveCartas, var jogador1: Jogador, var jogador2:
 
                 if (escolhaModo.equals("1")){
                     carta.modo = true
-                    carta.controleTurno++
                     break
                 }else if (escolhaModo.equals("2")){
                     carta.modo = false
@@ -76,7 +89,20 @@ class Game (var baralho: FakeDaoSaveCartas, var jogador1: Jogador, var jogador2:
                 }
             }
         }else if(!seu_campo.isEmpty()){
+            println("Escolha o id do monstro para equipar:")
 
+            for (monstro in seu_campo){
+                monstro.getInfo()
+            }
+            var escolhaMonstro = readLine()!!.toInt()
+
+            for (monstro in seu_campo){
+                if (monstro.id == escolhaMonstro){
+                    monstro.ptAtaque+= carta.ptAtaque
+                    monstro.ptDefesa+= carta.ptDefesa
+                    break
+                }
+            }
         }else{
             println("Você não possui monstro em campo")
         }
