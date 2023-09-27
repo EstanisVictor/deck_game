@@ -16,4 +16,11 @@ open class Carta (var id: Int, var nome: String, var desc: String, var ptAtaque:
         println("Pontos de defesa: $ptDefesa")
         println("Tipo: $tipo")
     }
+
+    fun upgrade_carta(carta: Carta){
+        ptAtaque += carta.ptAtaque
+        ptDefesa += carta.ptDefesa
+        nome += " + " + carta.nome
+    }
+
 }
