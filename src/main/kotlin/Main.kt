@@ -9,10 +9,8 @@ fun main(args: Array<String>) {
 
     println("****************************************")
 
-    var jogador1: Jogador = Jogador("Jogador 1", arrayListOf(), 20)
-    var jogador2: Jogador = Jogador("Jogador 2", arrayListOf(), 20)
+    var jogador1: Jogador = Jogador("Jogador 1", arrayListOf(), 1000)
+    var jogador2: Jogador = Jogador("Jogador 2", arrayListOf(), 1000)
 
     Game(baralho, jogador1, jogador2).iniciarJogo()
-
-    baralho.listAllCartas()
 }

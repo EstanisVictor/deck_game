@@ -6,8 +6,22 @@ class Jogador (var nome: String, var mao: ArrayList<Carta>, var pontosVida: Int)
 
     fun printCampoBatalha(){
         for (carta in campo_batalha){
+
+            if (carta.atacou){
+                continue
+            }
+
             carta.getInfo()
         }
+    }
+
+    fun verificaAtaque(): Boolean{
+        for (carta in campo_batalha){
+            if (carta.atacou){
+                return true
+            }
+        }
+        return false
     }
 
     fun getInfo(){
