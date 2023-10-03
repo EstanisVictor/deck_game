@@ -74,7 +74,7 @@ class Game (var baralho: FakeDaoSaveCartas, var jogador1: Jogador, var jogador2:
     }
 
     fun fazerJogada(jogador: Jogador, oponente: Jogador){
-        println("================================================")
+        println("${cor.reset}================================================")
         println("${cor.reset}Vez de ${jogador.nome}")
         println("${cor.yellow}Escolha sua jogada:\n${cor.cyan}1 - Jogar carta\n2 - Atacar${cor.reset}")
         var escolha = readLine()!!.toInt()
@@ -87,6 +87,7 @@ class Game (var baralho: FakeDaoSaveCartas, var jogador1: Jogador, var jogador2:
             }else{ //Se o jogador não possuir monstros na mão e nem no campo de batalha
                 jogador.getMao()
                 println("${cor.red}Você não possui monstro para jogar nesse turno")
+                println("${cor.red}Seu turno foi finalizado!!")
             }
         }else if (escolha == 2){
             if (jogador.campo_batalha.isEmpty()){
@@ -102,118 +103,134 @@ class Game (var baralho: FakeDaoSaveCartas, var jogador1: Jogador, var jogador2:
     }
 
     fun atacar(jogador: Jogador, oponente: Jogador){
-        while (true){
-            jogador.printCampoBatalha()
-            println("Selecione o monstro do seu campo que irá atacar:")
+        for(carta in jogador.campo_batalha){
+            if (carta.modo){
+                while (true){
+                    jogador.printCampoBatalha()
+                    println("Selecione o monstro do seu campo que irá atacar:")
 
-            var cartaEscolhida = readLine()!!.toInt()
-            var minha_carta = jogador.getCartaCampo(cartaEscolhida)
+                    var cartaEscolhida = readLine()!!.toInt()
+                    var minha_carta = jogador.getCartaCampo(cartaEscolhida)
 
-            if (minha_carta == null){
-                println("Carta não encontrada")
-                continue
-            }
+                    if (minha_carta == null){
+                        println("${cor.red}Carta não encontrada")
+                        continue
+                    }
 
-            if (!minha_carta.modo){
-                println("Você não pode atacar com essa carta pois ela está em modo defesa")
-                continue
-            }
+                    if (!minha_carta.modo){
+                        println("${cor.red}Você não pode atacar com essa carta pois ela está em modo defesa")
+                        continue
+                    }
 
-            if (minha_carta.controleTurno == 0){
-                println("Você não pode atacar com essa carta nesse turno")
-                continue
-            }
+                    if (minha_carta.controleTurno == 0){
+                        println("${cor.red}Você não pode atacar com essa carta nesse turno")
+                        continue
+                    }
 
-            if (minha_carta.controleTurno >= 1 && minha_carta.modo){
-                println("Selecione o monstro do campo do oponente para atacar:")
-                oponente.printCampoBatalha()
-                var cartaOponenteEscolhida = readLine()!!.toInt()
-                var cartaOponente = oponente.getCartaCampo(cartaOponenteEscolhida)
+                    if (minha_carta.controleTurno >= 1 && minha_carta.modo){
+                        if(oponente.campo_batalha.isEmpty()){
+                            println("Campo de batalha do oponente está vazio...")
+                            println("Você está atacando os pontos de vida  diretamente")
+                            println("O oponente perdeu ${minha_carta.ptAtaque} pontos de vida")
+                            oponente.pontosVida -= minha_carta.ptAtaque
+                            minha_carta.atacou = true
+                            continue
+                        }
+                        println("Selecione o monstro do campo do oponente para atacar:")
+                        oponente.printCampoBatalha()
+                        var cartaOponenteEscolhida = readLine()!!.toInt()
+                        var cartaOponente = oponente.getCartaCampo(cartaOponenteEscolhida)
 
-                if (cartaOponente == null){
-                    println("Carta não encontrada")
-                    continue
-                }
-
-                if (cartaOponente.modo) {
-                    minha_carta.atacou = true
-                    if (minha_carta.ptAtaque > cartaOponente.ptAtaque) {
-                        oponente.campo_batalha.remove(cartaOponente)
-                        var dif = minha_carta.ptAtaque - cartaOponente.ptAtaque
-                        oponente.pontosVida -= dif
-                        println("Você destruiu a carta do oponente")
-                        println("O oponente perdeu $dif pontos de vida")
-
-                        if (oponente.pontosVida <= 0) {
-                            println("O ${oponente.nome} chegou a 0 pontos de vida, ${jogador.nome} venceu o jogo!!")
-                            break
+                        if (cartaOponente == null){
+                            println("Carta não encontrada")
+                            continue
                         }
 
-                        println("Pontos de vida restante do oponente: ${oponente.pontosVida}")
-                        minha_carta.controleTurno = 0
-                    } else if (minha_carta.ptAtaque < cartaOponente.ptAtaque) {
-                        jogador.campo_batalha.remove(minha_carta)
-                        var dif =  cartaOponente.ptAtaque - minha_carta.ptAtaque
-                        jogador.pontosVida -= dif
-                        println("Sua carta foi destruída")
-                        println("Você perdeu $dif pontos de vida")
+                        if (cartaOponente.modo) {
+                            minha_carta.atacou = true
+                            if (minha_carta.ptAtaque > cartaOponente.ptAtaque) {
+                                oponente.campo_batalha.remove(cartaOponente)
+                                var dif = minha_carta.ptAtaque - cartaOponente.ptAtaque
+                                oponente.pontosVida -= dif
+                                println("Você destruiu a carta do oponente")
+                                println("O oponente perdeu $dif pontos de vida")
 
-                        if(jogador.pontosVida <= 0){
-                            println("Seus pontos de vida chegaram a 0, você perdeu o jogo!!")
+                                if (oponente.pontosVida <= 0) {
+                                    println("O ${oponente.nome} chegou a 0 pontos de vida, ${jogador.nome} venceu o jogo!!")
+                                    break
+                                }
+
+                                println("Pontos de vida restante do oponente: ${oponente.pontosVida}")
+                                minha_carta.controleTurno = 0
+                            } else if (minha_carta.ptAtaque < cartaOponente.ptAtaque) {
+                                jogador.campo_batalha.remove(minha_carta)
+                                var dif =  cartaOponente.ptAtaque - minha_carta.ptAtaque
+                                jogador.pontosVida -= dif
+                                println("Sua carta foi destruída")
+                                println("Você perdeu $dif pontos de vida")
+
+                                if(jogador.pontosVida <= 0){
+                                    println("Seus pontos de vida chegaram a 0, você perdeu o jogo!!")
+                                    break
+                                }
+                                println("Pontos de vida restante: ${jogador.pontosVida}")
+                            } else {
+                                jogador.campo_batalha.remove(minha_carta)
+                                oponente.campo_batalha.remove(cartaOponente)
+                                println("Ambos os monstros foram destruídos")
+                                println("Nenhum jogador perdeu pontos de vida")
+                            }
+                        }else{
+                            minha_carta.atacou = true
+                            if (minha_carta.ptAtaque > cartaOponente.ptDefesa) {
+                                oponente.campo_batalha.remove(cartaOponente)
+                                println("Você destruiu a carta do oponente")
+                                println("O oponente não perdeu pontos de vida")
+                                println("Pontos de vida restante do oponente: ${oponente.pontosVida}")
+                                minha_carta.controleTurno = 0
+                            } else if (minha_carta.ptAtaque < cartaOponente.ptDefesa) {
+                                var dif =  cartaOponente.ptDefesa - minha_carta.ptAtaque
+                                jogador.pontosVida -= dif
+                                println("Sua carta foi destruída")
+                                println("Você perdeu $dif pontos de vida")
+                                println("Pontos de vida restante: ${jogador.pontosVida}")
+                                jogador.campo_batalha.remove(minha_carta)
+                            } else {
+                                jogador.campo_batalha.remove(minha_carta)
+                                oponente.campo_batalha.remove(cartaOponente)
+                                println("Ambos os monstros foram destruídos")
+                                println("Nenhum jogador perdeu pontos de vida")
+                            }
+                        }
+                    }
+
+                    if (oponente.pontosVida <= 0){
+                        println("O jogador ${oponente.nome} perdeu o jogo")
+                        break
+                    }else if(jogador.pontosVida <= 0){
+                        println("O jogador ${jogador.nome} perdeu o jogo")
+                        break
+                    }
+
+                    if (!jogador.verificaAtacou() && jogador.isAtaque()){
+                        println("================================================")
+                        println("Deseja atacar novamente?\n1 - SIM\n2 - NÃO")
+                        var escolha = readLine()!!.toInt()
+
+                        if (escolha == 2){
                             break
                         }
-                        println("Pontos de vida restante: ${jogador.pontosVida}")
-                    } else {
-                        jogador.campo_batalha.remove(minha_carta)
-                        oponente.campo_batalha.remove(cartaOponente)
-                        println("Ambos os monstros foram destruídos")
-                        println("Nenhum jogador perdeu pontos de vida")
-                    }
-                }else{
-                    minha_carta.atacou = true
-                    if (minha_carta.ptAtaque > cartaOponente.ptDefesa) {
-                        oponente.campo_batalha.remove(cartaOponente)
-                        println("Você destruiu a carta do oponente")
-                        println("O oponente não perdeu pontos de vida")
-                        println("Pontos de vida restante do oponente: ${oponente.pontosVida}")
-                        minha_carta.controleTurno = 0
-                    } else if (minha_carta.ptAtaque < cartaOponente.ptDefesa) {
-                        var dif =  cartaOponente.ptDefesa - minha_carta.ptAtaque
-                        jogador.pontosVida -= dif
-                        println("Sua carta foi destruída")
-                        println("Você perdeu $dif pontos de vida")
-                        println("Pontos de vida restante: ${jogador.pontosVida}")
-                        jogador.campo_batalha.remove(minha_carta)
-                    } else {
-                        jogador.campo_batalha.remove(minha_carta)
-                        oponente.campo_batalha.remove(cartaOponente)
-                        println("Ambos os monstros foram destruídos")
-                        println("Nenhum jogador perdeu pontos de vida")
+                    }else{
+                        println("${cor.red}Você não possui mais monstros para atacar")
+                        println("Seu turno foi encerrado!")
+                        return
                     }
                 }
             }
 
-            if (oponente.pontosVida <= 0){
-                println("O jogador ${oponente.nome} perdeu o jogo")
-                break
-            }else if(jogador.pontosVida <= 0){
-                println("O jogador ${jogador.nome} perdeu o jogo")
-                break
-            }
-
-            if (!jogador.verificaAtaque()){
-                println("================================================")
-                println("Deseja atacar novamente?\n1 - SIM\n2 - NÃO")
-                var escolha = readLine()!!.toInt()
-
-                if (escolha == 2){
-                    break
-                }
-            }else{
-                println("Você não possui mais monstros para atacar")
-                break
-            }
         }
+        println("Você não possui monstros em modo de Ataque!!")
+        fazerJogada(jogador, oponente)
     }
 
     fun escolherCarta(jogador: Jogador, oponente: Jogador){
@@ -263,14 +280,14 @@ class Game (var baralho: FakeDaoSaveCartas, var jogador1: Jogador, var jogador2:
                         var monstro = jogador.getCartaCampo(idMonstro)
 
                         if (monstro == null){
-                            println("Carta não encontrada, selecione novamente")
+                            println("${cor.red}Carta não encontrada, selecione novamente")
                             continue
                         }
                         jogador.campo_batalha.remove(monstro)
                         return escolherCarta(jogador, oponente)
                     }
                 }else{
-                    println("Turno finalizado")
+                    println("${cor.green}Turno finalizado")
                     return
                 }
             }
@@ -287,7 +304,7 @@ class Game (var baralho: FakeDaoSaveCartas, var jogador1: Jogador, var jogador2:
                 carta_monstro = jogador.getCartaCampo(idMonstro)
 
                 if (carta_monstro == null){
-                    println("Carta não encontrada")
+                    println("${cor.red}Carta não encontrada")
                 }
             }
             carta_monstro.upgrade_carta(carta)
@@ -296,11 +313,13 @@ class Game (var baralho: FakeDaoSaveCartas, var jogador1: Jogador, var jogador2:
             if (op == 1) {
                 atacar(jogador, oponente)
             }else{
-                println("Turno finalizado")
+                println("${cor.green}Turno finalizado")
                 return
             }
         }else{
-            println("Você não possui monstro em campo")
+            println("${cor.red}Você não possui monstro em campo")
+            Thread.sleep(1000)
+
             return escolherCarta(jogador, oponente)
         }
 

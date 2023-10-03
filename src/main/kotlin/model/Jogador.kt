@@ -7,7 +7,7 @@ class Jogador (var nome: String, var mao: ArrayList<Carta>, var pontosVida: Int)
     var campo_batalha: ArrayList<Carta> = ArrayList()
 
     fun printCampoBatalha(){
-        println("${cor.magenta}------------------CAMPO DE BATALHA------------------")
+        println("${cor.magenta}------------------CAMPO DE BATALHA - ${nome}------------------")
         for (carta in campo_batalha){
 
             if (carta.atacou){
@@ -18,7 +18,7 @@ class Jogador (var nome: String, var mao: ArrayList<Carta>, var pontosVida: Int)
         }
     }
 
-    fun verificaAtaque(): Boolean{
+    fun verificaAtacou(): Boolean{
         for (carta in campo_batalha){
             if (carta.atacou){
                 return true
@@ -26,7 +26,14 @@ class Jogador (var nome: String, var mao: ArrayList<Carta>, var pontosVida: Int)
         }
         return false
     }
-
+    fun isAtaque():  Boolean{
+        for (carta in campo_batalha){
+            if (carta.modo){
+                return true
+            }
+        }
+        return false
+    }
     fun getInfo(){
         println("================================================")
         println("Nome: $nome")
