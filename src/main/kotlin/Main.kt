@@ -1,16 +1,15 @@
 import model.DAO.FakeDaoSaveCartas
 import model.Game
 import model.Jogador
+import tools.Colors
 import tools.LeitorCartas
 
 fun main(args: Array<String>) {
     var baralho = FakeDaoSaveCartas()
     LeitorCartas.getCartas(baralho)
 
-    println("****************************************")
-
-    var jogador1: Jogador = Jogador("Jogador 1", arrayListOf(), 1000)
-    var jogador2: Jogador = Jogador("Jogador 2", arrayListOf(), 1000)
+    var jogador1: Jogador = Jogador("Vitão", arrayListOf(), 10000)
+    var jogador2: Jogador = Jogador("Rilton", arrayListOf(), 10000)
 
     Game(baralho, jogador1, jogador2).iniciarJogo()
 }

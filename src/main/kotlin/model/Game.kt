@@ -1,10 +1,12 @@
 package model
 
 import model.DAO.FakeDaoSaveCartas
+import tools.Colors
 
 class Game (var baralho: FakeDaoSaveCartas, var jogador1: Jogador, var jogador2: Jogador){
-
+    var cor = Colors()
     fun distribuirCartas(){
+        println("${cor.yellow}Cada jogador receberá 5 cartas")
         for (i in 1..5){
             var carta = baralho.cartas.random()
             jogador1.mao.add(carta)
@@ -17,28 +19,24 @@ class Game (var baralho: FakeDaoSaveCartas, var jogador1: Jogador, var jogador2:
     }
 
     fun iniciarJogo(){
-        println("Iniciando jogo...")
+        println("${cor.green}Iniciando jogo...")
 
         distribuirCartas()
 
         while (jogador1.pontosVida > 0 && jogador2.pontosVida > 0){
             turno(jogador1, jogador2)
+            resetTurno(jogador1)
 
             if (jogador2.pontosVida <= 0 || jogador1.pontosVida <= 0){
                 break
             }
 
             turno(jogador2, jogador1)
+            resetTurno(jogador2)
         }
     }
 
     fun turno(jogador: Jogador, oponente: Jogador){
-
-        for (carta in jogador.campo_batalha){
-            carta.atacou = false
-            carta.controleTurno++
-        }
-
         if(jogador.mao.size < 10){
             sacarCarta(jogador)
             fazerJogada(jogador, oponente)
@@ -55,6 +53,13 @@ class Game (var baralho: FakeDaoSaveCartas, var jogador1: Jogador, var jogador2:
         baralho.cartas.remove(carta)
     }
 
+    fun resetTurno(jogador: Jogador){
+        for (carta in jogador.campo_batalha){
+            carta.atacou = false
+            carta.controleTurno++
+        }
+    }
+
     fun descartarCarta(jogador: Jogador){
         jogador.getMao()
         println("...............................................")
@@ -62,7 +67,7 @@ class Game (var baralho: FakeDaoSaveCartas, var jogador1: Jogador, var jogador2:
         var cartaEscolhida = readLine()!!.toInt()
         var carta = jogador.getCartaMao(cartaEscolhida)
         if (carta == null){
-            println("Carta não encontrada")
+            println("${cor.red}Carta não encontrada")
             return descartarCarta(jogador)
         }
         jogador1.mao.remove(carta)
@@ -70,8 +75,8 @@ class Game (var baralho: FakeDaoSaveCartas, var jogador1: Jogador, var jogador2:
 
     fun fazerJogada(jogador: Jogador, oponente: Jogador){
         println("================================================")
-        println("Vez de ${jogador.nome}")
-        println("Escolha sua jogada:\n1 - Jogar carta\n2 - Atacar\n3 - Alterar modo de carta")
+        println("${cor.reset}Vez de ${jogador.nome}")
+        println("${cor.yellow}Escolha sua jogada:\n${cor.cyan}1 - Jogar carta\n2 - Atacar${cor.reset}")
         var escolha = readLine()!!.toInt()
 
         if (escolha == 1){
@@ -81,15 +86,18 @@ class Game (var baralho: FakeDaoSaveCartas, var jogador1: Jogador, var jogador2:
                 escolherCarta(jogador, oponente)
             }else{ //Se o jogador não possuir monstros na mão e nem no campo de batalha
                 jogador.getMao()
-                println("Você não possui monstro para jogar nesse turno")
+                println("${cor.red}Você não possui monstro para jogar nesse turno")
             }
         }else if (escolha == 2){
             if (jogador.campo_batalha.isEmpty()){
-                println("Você não possui monstros no campo de batalha para atacar")
+                println("${cor.red}Você não possui monstros no campo de batalha para atacar")
                 fazerJogada(jogador, oponente)
             }else{
                 atacar(jogador, oponente)
             }
+        }else{
+            println("${cor.red}Opção inválida")
+            fazerJogada(jogador, oponente)
         }
     }
 
@@ -209,24 +217,22 @@ class Game (var baralho: FakeDaoSaveCartas, var jogador1: Jogador, var jogador2:
     }
 
     fun escolherCarta(jogador: Jogador, oponente: Jogador){
-
-        println("================================================")
         jogador.getMao()
-        println("Selecione o ID da carta que deseja jogar:")
+        println("${cor.reset}Selecione o ID da carta que deseja jogar:")
 
         var cartaEscolhida = readLine()!!.toInt()
 
         var carta = jogador.getCartaMao(cartaEscolhida)
 
         if (carta == null){
-            println("Carta não encontrada")
+            println("${cor.red}Carta não encontrada")
             return escolherCarta(jogador, oponente)
         }
 
         if(carta.tipo.equals("monstro", true)){
 
             while (true){
-                println("Escolha o modo que deseja posicionar o monstro:\n1 - ATAQUE\n2 - DEFESA")
+                println("${cor.yellow}Escolha o modo que deseja posicionar o monstro:\n${cor.cyan}1 - ATAQUE\n2 - DEFESA${cor.reset}")
                 var escolhaModo = readLine()
 
                 if (escolhaModo.equals("1")){ //true para modo ataque
@@ -237,14 +243,14 @@ class Game (var baralho: FakeDaoSaveCartas, var jogador1: Jogador, var jogador2:
                     carta.modo = false
                     break
                 }else{
-                    println("Opção inválida")
+                    println("${cor.red}Opção inválida")
                 }
             }
 
             if (jogador.campo_batalha.size < 5){
                 jogador.campo_batalha.add(carta)
             }else{
-                println("Campo de batalha cheio!! Você não pode jogar mais monstros")
+                println("${cor.red}Campo de batalha cheio!! Você não pode jogar mais monstros")
                 println("Selecione a opção:\n1 - Escolher outra carta\n2 - Substituir monstro no campo de batalha\n3 - Finalizar turno")
                 var op = readLine()!!.toInt()
                 if (op == 1){

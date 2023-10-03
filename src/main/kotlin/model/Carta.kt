@@ -1,7 +1,9 @@
 package model
 
-open class Carta (var id: Int, var nome: String, var desc: String, var ptAtaque: Int, var ptDefesa: Int, var tipo: String) {
+import tools.Colors
 
+open class Carta (var id: Int, var nome: String, var desc: String, var ptAtaque: Int, var ptDefesa: Int, var tipo: String) {
+    var cor = Colors()
     var controleTurno: Int = 0
     var atacou: Boolean = false
 
@@ -9,13 +11,13 @@ open class Carta (var id: Int, var nome: String, var desc: String, var ptAtaque:
     var modo: Boolean = tipo.equals("monstro", true)
 
     fun getInfo(){
-        println("================================================")
-        println("ID: $id")
-        println("Nome: $nome")
-        println("Descrição: $desc")
-        println("Pontos de ataque: $ptAtaque")
-        println("Pontos de defesa: $ptDefesa")
-        println("Tipo: $tipo")
+        println("${cor.reset}================================================")
+        println("${cor.green}ID: $id")
+        println("${cor.cyan}Nome: $nome")
+        println("${cor.cyan}Descrição: $desc")
+        println("${cor.red}Pontos de ataque: $ptAtaque")
+        println("${cor.blue}Pontos de defesa: $ptDefesa")
+        println("${cor.cyan}Tipo: $tipo")
     }
 
     fun upgrade_carta(carta: Carta){
