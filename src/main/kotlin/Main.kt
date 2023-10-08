@@ -1,7 +1,6 @@
-import model.DAO.FakeDaoSaveCartas
+import model.dao.FakeDaoSaveCartas
 import model.Game
 import model.Jogador
-import tools.Colors
 import tools.LeitorCartas
 
 fun main(args: Array<String>) {

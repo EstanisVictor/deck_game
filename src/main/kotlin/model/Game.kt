@@ -1,6 +1,6 @@
 package model
 
-import model.DAO.FakeDaoSaveCartas
+import model.dao.FakeDaoSaveCartas
 import tools.Colors
 
 class Game (var baralho: FakeDaoSaveCartas, var jogador1: Jogador, var jogador2: Jogador){
@@ -22,6 +22,11 @@ class Game (var baralho: FakeDaoSaveCartas, var jogador1: Jogador, var jogador2:
         println("${cor.green}Iniciando jogo...")
 
         distribuirCartas()
+        fazerJogada(jogador1, jogador2)
+        resetTurno(jogador1)
+
+        fazerJogada(jogador2, jogador1)
+        resetTurno(jogador2)
 
         while (jogador1.pontosVida > 0 && jogador2.pontosVida > 0){
             turno(jogador1, jogador2)
@@ -62,22 +67,40 @@ class Game (var baralho: FakeDaoSaveCartas, var jogador1: Jogador, var jogador2:
 
     fun descartarCarta(jogador: Jogador){
         jogador.getMao()
-        println("...............................................")
-        println("Selecione um ID das cartas acima para descartar:")
-        var cartaEscolhida = readLine()!!.toInt()
+
+        var cartaEscolhida = -1
+        while (true) {
+            println("${cor.reset}...............................................")
+            println("${jogador.nome} selecione um ID das cartas acima para descartar:")
+            try {
+                cartaEscolhida = readLine()?.toInt() ?: 0
+                break
+            } catch (e: NumberFormatException) {
+                println("${cor.red}Por favor, insira uma opção válida.")
+            }
+        }
+
         var carta = jogador.getCartaMao(cartaEscolhida)
         if (carta == null){
             println("${cor.red}Carta não encontrada")
             return descartarCarta(jogador)
         }
-        jogador1.mao.remove(carta)
+        jogador.mao.remove(carta)
     }
 
     fun fazerJogada(jogador: Jogador, oponente: Jogador){
         println("${cor.reset}================================================")
-        println("${cor.reset}Vez de ${jogador.nome}")
-        println("${cor.yellow}Escolha sua jogada:\n${cor.cyan}1 - Jogar carta\n2 - Atacar${cor.reset}")
-        var escolha = readLine()!!.toInt()
+        println("${cor.reset}Vez de ${jogador.nome} - Pontos de vida: ${jogador.pontosVida}")
+        var escolha = -1
+        while (true) {// Loop para garantir que o usuário vai inserir um número para a linha
+            println("${cor.yellow}Escolha sua jogada:\n${cor.cyan}1 - Jogar carta\n2 - Atacar\n3 - Alterar modo de batalha\n4 - Finalizar turno${cor.reset}")
+            try {
+                escolha = readLine()?.toInt() ?: 0
+                break
+            } catch (e: NumberFormatException) {
+                println("${cor.red}Por favor, insira uma opção válida.")
+            }
+        }
 
         if (escolha == 1){
             if (jogador.verificaMao()) { //Se o jogador possuir ao menos 1 monstro na mão para jogar
@@ -96,6 +119,15 @@ class Game (var baralho: FakeDaoSaveCartas, var jogador1: Jogador, var jogador2:
             }else{
                 atacar(jogador, oponente)
             }
+        }else if (escolha == 3){
+            if (jogador.campo_batalha.isEmpty()){
+                println("${cor.red}Você não possui monstros no campo de batalha para alterar o modo de batalha")
+                fazerJogada(jogador, oponente)
+            }else{
+                trocarPosicao(jogador)
+            }
+        }else if (escolha == 4){
+            println("${cor.red}Seu turno foi finalizado!!")
         }else{
             println("${cor.red}Opção inválida")
             fazerJogada(jogador, oponente)
@@ -107,9 +139,24 @@ class Game (var baralho: FakeDaoSaveCartas, var jogador1: Jogador, var jogador2:
             if (carta.modo){
                 while (true){
                     jogador.printCampoBatalha()
-                    println("Selecione o monstro do seu campo que irá atacar:")
 
-                    var cartaEscolhida = readLine()!!.toInt()
+                    if (jogador.verificaAtacou()){
+                        println("${cor.red}Você não possui monstros no campo de batalha para atacar")
+                        println("${cor.red}Seu turno foi finalizado!!")
+                        return
+                    }
+
+                    var cartaEscolhida = -1
+                    while (true) {
+                        println("Selecione o monstro do seu campo que irá atacar:")
+                        try {
+                            cartaEscolhida = readLine()?.toInt() ?: 0
+                            break
+                        } catch (e: NumberFormatException) {
+                            println("${cor.red}Por favor, insira uma opção válida.")
+                        }
+                    }
+
                     var minha_carta = jogador.getCartaCampo(cartaEscolhida)
 
                     if (minha_carta == null){
@@ -213,16 +260,25 @@ class Game (var baralho: FakeDaoSaveCartas, var jogador1: Jogador, var jogador2:
                     }
 
                     if (!jogador.verificaAtacou() && jogador.isAtaque()){
-                        println("================================================")
-                        println("Deseja atacar novamente?\n1 - SIM\n2 - NÃO")
-                        var escolha = readLine()!!.toInt()
+                        var escolha = -1
+
+                        while (true) {
+                            println("================================================")
+                            println("Deseja atacar novamente?\n1 - SIM\n2 - NÃO")
+                            try {
+                                escolha = readLine()?.toInt() ?: 0
+                                break
+                            } catch (e: NumberFormatException) {
+                                println("${cor.red}Por favor, insira uma opção válida.")
+                            }
+                        }
 
                         if (escolha == 2){
-                            break
+                            return
                         }
                     }else{
                         println("${cor.red}Você não possui mais monstros para atacar")
-                        println("Seu turno foi encerrado!")
+                        println("Seu turno foi encerrado!${cor.reset}")
                         return
                     }
                 }
@@ -235,9 +291,16 @@ class Game (var baralho: FakeDaoSaveCartas, var jogador1: Jogador, var jogador2:
 
     fun escolherCarta(jogador: Jogador, oponente: Jogador){
         jogador.getMao()
-        println("${cor.reset}Selecione o ID da carta que deseja jogar:")
-
-        var cartaEscolhida = readLine()!!.toInt()
+        var cartaEscolhida = -1
+        while (true) {
+            println("${cor.reset}Selecione o ID da carta que deseja jogar:")
+            try {
+                cartaEscolhida = readLine()?.toInt() ?: 0
+                break
+            } catch (e: NumberFormatException) {
+                println("${cor.red}Carta Inválida.")
+            }
+        }
 
         var carta = jogador.getCartaMao(cartaEscolhida)
 
@@ -268,8 +331,17 @@ class Game (var baralho: FakeDaoSaveCartas, var jogador1: Jogador, var jogador2:
                 jogador.campo_batalha.add(carta)
             }else{
                 println("${cor.red}Campo de batalha cheio!! Você não pode jogar mais monstros")
-                println("Selecione a opção:\n1 - Escolher outra carta\n2 - Substituir monstro no campo de batalha\n3 - Finalizar turno")
-                var op = readLine()!!.toInt()
+                var op = -1
+                while (true) {
+                    println("Selecione a opção:\n1 - Escolher outra carta\n2 - Substituir monstro no campo de batalha\n3 - Finalizar turno")
+                    try {
+                        op = readLine()?.toInt() ?: 0
+                        break
+                    } catch (e: NumberFormatException) {
+                        println("${cor.red}Opção Inválida.")
+                    }
+                }
+
                 if (op == 1){
                     return escolherCarta(jogador, oponente)
                 }else if (op == 2){
@@ -299,8 +371,18 @@ class Game (var baralho: FakeDaoSaveCartas, var jogador1: Jogador, var jogador2:
             while (carta_monstro == null){
 
                 jogador.printCampoBatalha()
-                println("Escolha o ID do monstro que deseja equipar:")
-                var idMonstro = readLine()!!.toInt()
+                var idMonstro = -1
+
+                while (true) {
+                    println("Escolha o ID do monstro que deseja equipar:")
+                    try {
+                        idMonstro = readLine()?.toInt() ?: 0
+                        break
+                    } catch (e: NumberFormatException) {
+                        println("${cor.red}Opção Inválida.")
+                    }
+                }
+
                 carta_monstro = jogador.getCartaCampo(idMonstro)
 
                 if (carta_monstro == null){
@@ -308,8 +390,18 @@ class Game (var baralho: FakeDaoSaveCartas, var jogador1: Jogador, var jogador2:
                 }
             }
             carta_monstro.upgrade_carta(carta)
-            println("Você deseja atacar ou finalizar turno?\n1 - Atacar\n2 - Finalizar turno")
-            var op = readLine()!!.toInt()
+            var op = -1
+
+            while (true) {
+                println("Você deseja atacar ou finalizar turno?\n1 - Atacar\n2 - Finalizar turno")
+                try {
+                    op = readLine()?.toInt() ?: 0
+                    break
+                } catch (e: NumberFormatException) {
+                    println("${cor.red}Opção Inválida.")
+                }
+            }
+
             if (op == 1) {
                 atacar(jogador, oponente)
             }else{
@@ -324,5 +416,46 @@ class Game (var baralho: FakeDaoSaveCartas, var jogador1: Jogador, var jogador2:
         }
 
         jogador.mao.remove(carta)
+    }
+
+    fun trocarPosicao(jogador: Jogador){
+        jogador.printCampoBatalha()
+        var idMonstro = -1
+        while (true) {
+            println("Escolha o ID do monstro que deseja trocar a posição:")
+            try {
+                idMonstro = readLine()?.toInt() ?: 0
+                break
+            } catch (e: NumberFormatException) {
+                println("${cor.red}Opção Inválida.")
+            }
+        }
+        var monstro = jogador.getCartaCampo(idMonstro)
+
+        if(monstro == null){
+            println("${cor.red}Carta não encontrada")
+            return trocarPosicao(jogador)
+        }
+
+        var escolhaModo = -1
+        while (true) {
+            println("Escolha o modo que deseja posicionar o monstro:\n1 - ATAQUE\n2 - DEFESA")
+            try {
+                escolhaModo = readLine()?.toInt() ?: 0
+
+                if (escolhaModo != 1 && escolhaModo != 2){
+                    println("${cor.red}Opção Inválida.")
+                    continue
+                }
+
+                break
+            } catch (e: NumberFormatException) {
+                println("${cor.red}Opção Inválida.")
+            }
+        }
+
+        monstro.modo = escolhaModo == 1
+        println("${cor.green}Modo alterado com sucesso")
+        println("Turno finalizado${cor.reset}")
     }
 }

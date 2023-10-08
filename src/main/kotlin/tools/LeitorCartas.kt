@@ -1,7 +1,7 @@
 package tools
 
 import model.Carta
-import model.DAO.FakeDaoSaveCartas
+import model.dao.FakeDaoSaveCartas
 import java.io.File
 import java.io.InputStream
 import java.nio.charset.Charset
@@ -10,7 +10,6 @@ class LeitorCartas (){
 
     companion object{
         private lateinit var cartas:List<Carta>
-
         fun getCartas(baralho: FakeDaoSaveCartas):List<Carta>{
             if(!::cartas.isInitialized){
                 cartas = lerCartasCSV().map {
@@ -27,7 +26,6 @@ class LeitorCartas (){
             }
             return cartas.map { it }  //retorna uma replica das cartas
         }
-
         private fun lerCartasCSV():List<String>{
             val streamDados:InputStream = File("cartas1.csv").inputStream()
             val leitorStream = streamDados.bufferedReader(Charset.forName("windows-1252"))
@@ -36,7 +34,4 @@ class LeitorCartas (){
                 .toList()
         }
     }
-
-
-
 }

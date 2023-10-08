@@ -15,17 +15,31 @@ class Jogador (var nome: String, var mao: ArrayList<Carta>, var pontosVida: Int)
             }
 
             carta.getInfo()
+            if (carta.modo){
+                println("${cor.magenta}Modo: Ataque")
+            }else{
+                println("${cor.magenta}Modo: Defesa")
+            }
         }
     }
 
     fun verificaAtacou(): Boolean{
+
+        var cont = 0
         for (carta in campo_batalha){
-            if (carta.atacou){
-                return true
+            if (carta.modo){
+                cont++
             }
         }
-        return false
+
+        for (carta in campo_batalha){
+            if (carta.atacou){
+                cont--
+            }
+        }
+        return cont == 0
     }
+    
     fun isAtaque():  Boolean{
         for (carta in campo_batalha){
             if (carta.modo){
@@ -34,6 +48,7 @@ class Jogador (var nome: String, var mao: ArrayList<Carta>, var pontosVida: Int)
         }
         return false
     }
+
     fun getInfo(){
         println("================================================")
         println("Nome: $nome")
@@ -75,5 +90,4 @@ class Jogador (var nome: String, var mao: ArrayList<Carta>, var pontosVida: Int)
         }
         return null
     }
-
 }
